@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Register {% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/signup.style.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/script.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <form action="/signup" method="post" name="myForm" onsubmit="return validationForm()">
+            <h1>SIGN UP</h1>
+            <div class="form-group"  class="same" id="firstname">
+                <label for="firstname">First Name :</label>
+                <div class="inner">
+                    <input id="firstname" type="text" required class="form-control" name="firstname">
+                    <span class="formerror"></span>
+                </div>
+            </div>
+            <div class="form-group" class="same" id="lastname">
+                <label for="lastname">Last Name :</label>
+                <div class="inner">
+                    <input id="lastname" type="text" required class="form-control" name="lastname">
+                    <span class="formerror"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="username">User Name :</label>
+                <input id="username" type="text" required class="form-control" name="username">
+                <span class="text-success" id="availability1">Username is available</span>
+                <span class="text-danger" id="availability2">Username is not available</span>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Id :</label>
+                <input id="emailid" type="email" required class="form-control" name="email">
+                <div class="otp">
+                    <button class="btn btn-primary" disabled id="getotp" onclick="getOtp()">Get OTP</button>
+                    <input id="otp" type="number" required class="form-control" name="otp">
+                </div>
+                <button class="btn btn-primary" id="resendotp" onclick="getOtp()">Resend OTP</button>
+            </div>
+            <div class="form-group" class="same" id="pass">
+                <label for="password">Password :</label>
+                <div class="inner">
+                    <input id="password" type="password" required class="form-control" name="password">
+                </div>
+            </div>
+            <div class="form-group" class="same" id="confpass">
+                <label for="confirmpassword">Confirm Password :</label>
+                <div class="pass">
+                    <input id="confirmpassword" required type="password" class="form-control" name="confirmpassword">
+                    <div>
+                        <i id="wrong" class="fa-solid fa-xmark"></i>
+                    </div>
+                    <div>
+                        <i id="correct" class="fa-solid fa-check"></i>
+                    </div>
+                </div>
+                <span class="formerror"></span>
+            </div>
+            <div class="mx-auto">
+                <input type="submit" class="mt-3 btn btn-primary" name="signup" value="SIGN UP"></input>
+            </div>
+            <div class="sign">
+                <p>Already Have An Account?</p>
+                <a href="/login">SIGN IN</a>
+            </div>
+        </form>
+    </div>
+    
+{% endblock %}

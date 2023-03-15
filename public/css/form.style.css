@@ -1,0 +1,302 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-family: 'Libre Baskerville', serif;
+}
+
+header {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.logo {
+    width: 200px;
+}
+
+.logout {
+    font-size: 20px;
+    border-radius: 20px;
+    display: inline-block;
+    padding: 5px 30px;
+    background-color: rgb(201, 235, 79);
+    color: #222;
+}
+
+.main-body {
+    margin-top: 20px;
+    display: flex;
+}
+
+.left {
+    width: 25%;
+}
+
+.inner-left {
+    background-color: rgb(201, 133, 133);
+    border-radius: 10px;
+    padding: 10px 25px;
+}
+
+.right {
+    width: 75%;
+}
+
+.user {
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user p {
+    width: 30%;
+    padding: 0;
+    margin: 0;
+}
+
+.active {
+    font-size: 10px;
+    color: green;
+}
+
+.inner-right {
+    min-height: 200px;
+    margin-left: 10px;
+}
+
+.form {
+    position: relative;
+}
+
+#post {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    outline: none;
+}
+
+.post-btn {
+    position: absolute;
+    right: 10px;
+    bottom: 15px;
+    display: inline-block;
+    padding: 2px 20px;
+    background-color: rgb(216, 146, 146);
+    /* background-color: rgb(179, 120, 120); */
+    color: #222;
+    border: none;
+    border-radius: 10px;
+}
+
+.inner-post {
+    display: flex;
+    justify-content: space-between;
+}
+
+.userdetails {
+    display: flex;
+    align-items: center;
+    padding-bottom: 10px;
+}
+
+.userdetails p {
+    padding: 0;
+    margin: 0;
+    margin-left: 5px;
+}
+
+.posts {
+    border: 1px solid #222;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 10px 0;
+}
+
+.commentbtn {
+    display: inline-block;
+    padding: 5px 15px;
+    background-color: #222;
+    color: #fff;
+    border-radius: 10px;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.like {
+    display: flex;
+    align-items: center;
+}
+
+.like p {
+    margin: 0;
+    padding: 0;
+    padding-right: 5px;
+}
+
+.like i {
+    font-size: 20px;
+    color: #222;
+}
+
+.bottom-post {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;    
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #222;
+}
+
+.like i {
+    color: #222;
+}
+
+.likebtn {
+    color: #222;
+}
+
+#commtext {
+    width: 100%;
+}
+
+.commentform .commentbtn {
+    margin-top: 10px;
+}
+
+.formcomment {
+    margin-top: 10px;
+}
+
+.comment-section {
+    display: none;
+}
+
+.userinfo {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    margin-right: 25px;
+    justify-content: center;
+    align-items: center;
+}
+
+.userinfo i {
+    margin-bottom: 5px;
+    font-size: 30px;
+}
+
+.userinfo p {
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+}
+
+.uid {
+    display: none;
+}
+
+.username {
+    display: none;
+}
+
+.comment {
+    margin-top: 10px;
+}
+
+.inner-comment {
+    padding: 10px;
+    border: 1px solid #222;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.inner-comment p {
+    margin: 0;
+    padding: 5px 0;
+    margin-left: 5px;
+}
+
+.cmmnt-btn {
+    margin-top: 10px;
+}
+
+.menu ul {
+    display: none;
+    padding: 0;
+    list-style: none;
+    position: absolute;
+    right: 100px;
+    background: rgb(182, 87, 87);
+    margin: 10px;
+    border-radius: 10px;
+}
+
+.menu ul li {
+    padding: 12px;
+    text-align: center;
+    color: #222;
+    z-index: 888;
+    border-bottom: 1px solid grey;
+}
+
+.menu ul li:last-child {
+    border-bottom: none;
+}
+
+.menu {
+    cursor: pointer;
+}
+
+.cross {
+    display: none;
+}
+
+.menubar {
+    display: block;
+}
+
+.inner-post i {
+    font-size: 25px;
+}
+
+.dropdown-menu {
+    right: 0;
+    left:unset;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.btn {
+    color: #222;
+    background-color: rgb(201, 133, 133);
+}
+
+header i {
+    font-size: 25px;
+}
+
+header p {
+    margin: 0;
+    display: none;
+}
+
+
+.dropdown-menu {
+    padding: 5px;
+    background: rgb(182, 87, 87);
+    border-radius: 10px;
+}
+
+.dropdown-menu a {
+    border-bottom: 1px solid grey;
+}
+
+.dropdown-menu a:last-child {
+    border-bottom: none;
+}
+
+.dropdown-menu a:hover {
+    color: #222;
+    background-color: rgb(182, 87, 87);
+}

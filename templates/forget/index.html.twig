@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Forgot {% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/login.style.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/script.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+
+    <!-- creating a form with username and password for login -->
+    <div class="container">
+        {% if flag == 2 %}
+            <form action="/forgot" method="post">
+                <h1>Enter your Email ID :</h1>
+                <div class="form-group my-4">
+                    <input id="email" type="email" required class="form-control" name="email" placeholder="email">
+                </div>
+        {% endif %}
+        {% if flag == 1 %}
+            <form action="/forgot" method="post">
+                <p class="text-danger errormsg">{{ msg }}</p>
+                <h1>Enter your Email ID :</h1>
+                <div class="form-group my-4">
+                    <input id="email" type="email" required class="form-control" name="email" placeholder="email">
+                </div>
+        {% endif %}
+        {% if flag == 3 %}
+            <form action="/forgot" method="post">
+                <p class="text-success errormsg">{{ msg }}</p>
+                <h1>Enter your Email ID :</h1>
+                <div class="form-group my-4">
+                    <input id="email" type="email" required class="form-control" name="email" placeholder="email">
+                </div>
+        {% endif %}
+                <input type="submit" class="mt-3 btn btn-primary" name="login" value="Submit"></input>
+            </form>
+    </div>
+
+{% endblock %}
