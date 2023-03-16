@@ -42,13 +42,14 @@ function callAddPost() {
 }
 
 function addPost() {
-    var pusher = new Pusher('913b70eb80f62f270cf5', {
+    var pusher = new Pusher('5c90cb34f6af626fc27b', {
         cluster: 'ap2'
     });
     
     var channel = pusher.subscribe('demo_pusher');
     channel.bind('addName', function(data) {
         console.log(data);
+        console.log("post");
         const activeUsersList = document.querySelector('.post-area');
         const divItem = document.createElement('div');
         divItem.className = 'posts';

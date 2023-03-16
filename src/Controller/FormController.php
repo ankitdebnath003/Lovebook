@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Services\FormValidator;
 use App\Services\OtpManager;
+use App\Services\FormData;
 use App\Entity\UserLogin;
 use App\Entity\Username;
 use App\Entity\Userotp;
@@ -49,6 +50,11 @@ class FormController extends AbstractController
 
     /**
      * Constructor is used to set the values in class variables.
+     * 
+     *   @param object $em
+     *     Stores the object of Entity Manager Interface Class.
+     * 
+     *   @return void
      */
     public function __construct(EntityManagerInterface $em)
     {
@@ -66,6 +72,11 @@ class FormController extends AbstractController
      * If login data is valid then redirect the user to the main page otherwise
      * show the error to the user.
      * 
+     *   @param object $rq
+     *     Stores the object of Request class.
+     *   @param object $si
+     *     Stores the object of Session Interface class.
+     * 
      *   @var string $uName
      *     Stores the username.
      *   @var string $pass
@@ -74,10 +85,39 @@ class FormController extends AbstractController
      *   @return Response
      *     Based on valid username and password.
      */
-    public function loginform(SessionInterface $si, Request $rq): Response
+    public function loginform(Request $rq, SessionInterface $si): Response
     {
-        $uName = $rq->get("username");
-        $pass = $rq->get("password");
+        if ($rq->get("username")) {
+            $uName = $rq->get("username");
+            $pass = $rq->get("password");
+        }
+        else {
+            $form = new FormData($this->em);
+            $loginUser = $form->getActiveUsers();
+            $posts = $form->getAllPosts();
+            if ($si->get('username')) {
+                $form = new FormData($this->em);
+                $loginUser = $form->getActiveUsers();
+                $posts = $form->getAllPosts();
+                $si->set('postdata',$posts);
+                $si->set('loginuser',$loginUser);
+                return $this->render('form/index.html.twig',[
+                    "username" => $si->get('username'),
+                    "postdata" => $posts,
+                    "logindata" => $loginUser
+                ]);
+            }
+            return $this->render('login/index.html.twig',[
+                'flag' => 2,
+                'msg' => ''
+            ]);
+        }
+        $form = new FormData($this->em);
+        $loginUser = $form->getActiveUsers();
+        $posts = $form->getAllPosts();
+        $si->set('username',$uName);
+        $si->set('postdata',$posts);
+        $si->set('loginuser',$loginUser);
 
         $user = $this->em->getRepository(Username::class)->findOneBy(['username' => $uName]);
         $msg = 1;
@@ -101,57 +141,7 @@ class FormController extends AbstractController
                 "flag" => $flag
             ]);
         }
-
-        $login = new UserLogin();
-        $user = $this->em->getRepository(UserLogin::class)->findOneBy(["username" => $uName]);
-        if ($user != NULL) {
-            $user->setisLogin("YES");
-            $this->em->persist($user);
-            $this->em->flush();
-        }
-        else {
-            $login->setUsername($uName);
-            $login->setIsLogin("YES");
-            $this->em->persist($login);
-            $this->em->flush();
-        }
-
-        // Get the already login users.
-        $loginData = $this->em->getRepository(UserLogin::class)->findAll();
-        $loginUser = [];
-        for ($i = count($loginData)-1; $i >= 0; $i--) {
-            if ($loginData[$i]->getIsLogin() == "YES") {
-                array_push($loginUser, $loginData[$i]->getUsername());
-            }
-        }
         
-        // Get all the posts.
-        $postData = $this->em->getRepository(UserPost::class)->findAll();
-        $posts = [];
-        for ($i = count($postData)-1; $i >=0 ; $i--) {
-            $id = $postData[$i]->getId();
-
-            $postComment = $this->em->getRepository(PostComment::class)->findBy(['postid' => $id]);
-            $comment = [];
-            for ($j = count($postComment)-1; $j >=0 ; $j--) {
-                array_push($comment, $postComment[$j]->getComments());
-            }
-            $postLike = $this->em->getRepository(PostLike::class)->findBy(['postid' => $id]);
-            $name = $postData[$i]->getUsername();
-            $post = $postData[$i]->getPost();
-            $like = count($postLike);
-            $comments = count($postComment);
-            $arr = [
-                'id' => $id,
-                'user' => $name,
-                'post' => $post,
-                'likes' => $like,
-                'comments' => $comments,
-                'comment' => $comment
-            ];            
-            array_push($posts, $arr);
-        }
-
         return $this->render('form/index.html.twig',[
             "username" => $uName,
             "postdata" => $posts,
@@ -165,6 +155,9 @@ class FormController extends AbstractController
      * 
      * @Route("/signup", name = "signup") 
      * When register form is submitted this route is used.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
      * 
      *   @var string $fName
      *     Stores the firstname of the user.
@@ -216,8 +209,11 @@ class FormController extends AbstractController
     /**
      * This is a ajax function used to send otp to the user.
      * 
-     * @Route("/ajax", name = "ajax")
+     * @Route("/sendOtp", name = "sendOtp")
      * This route is used for ajax call for sending otp.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
      * 
      *   @var string $email
      *     Stores the email id of the user.
@@ -225,7 +221,7 @@ class FormController extends AbstractController
      *   @return Response
      *     based on otp is sent or not.
      */
-    public function ajaxAction(Request $rq): Response
+    public function sendOtpAction(Request $rq): Response
     {
         if ($rq->isXmlHttpRequest()) {  
             $email = $rq->get('emailid');
@@ -243,9 +239,7 @@ class FormController extends AbstractController
             } 
             return new Response("Mail Has been sent"); 
         } 
-        else { 
-             return new Response("Mail Can't be sent"); 
-        } 
+        return new Response("Mail Can't be sent"); 
     }
 
     /**
@@ -254,6 +248,9 @@ class FormController extends AbstractController
      * 
      * @Route("/availability", name = "availability")
      * This route is used for ajax call for username availability.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
      * 
      *   @var string $uName
      *     Stores the username of the user to check the availability.
@@ -269,9 +266,7 @@ class FormController extends AbstractController
             if ($user != NULL) {
                 return new Response(FALSE);
             }
-            else {
-                return new Response(TRUE);
-            }
+            return new Response(TRUE);
         }
     }
 
@@ -280,6 +275,9 @@ class FormController extends AbstractController
      * 
      * @Route("/changepass/{email}", name = "changepass")
      * When click on forgot password link then this route is used.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
      * 
      *   @var string $email
      *     Stores the email id of the user.
@@ -301,6 +299,9 @@ class FormController extends AbstractController
      * 
      * @Route("/passchange/{email}", name = "passchange")
      * When the clicked on submit after giving new password then this route is used.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
      * 
      *   @var string $email
      *     Stores the email id of the user.
@@ -355,19 +356,23 @@ class FormController extends AbstractController
      * @Route("/logout/{username}", name = "logout")
      * When clicked on logout button this route is used.
      * 
+     *   @param object $rq
+     *     Stores the object of Request class.
+     * 
      *   @var string $userName
      *     Stores the username.
      * 
      *   @return Response
      *     Redirect the user to the login page.
      */
-    public function logout(Request $rq): Response
+    public function logout(SessionInterface $si, Request $rq): Response
     {
         $userName = $rq->get("username");
         $user = $this->em->getRepository(UserLogin::class)->findOneBy(['username' => $userName]);
         $user->setisLogin("NO");
         $this->em->persist($user);
         $this->em->flush();
+        $si->clear();
         return $this->render('login/index.html.twig',[
             "flag" => 3,
         ]);
@@ -379,6 +384,9 @@ class FormController extends AbstractController
      * @Route("/forgot", name = "forgot")
      * When the user clicked on submit on the forgot password page then this 
      * route is used.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
      * 
      *   @var string $email
      *     Stores the email id of the user.
@@ -409,7 +417,23 @@ class FormController extends AbstractController
     }
 
     /**
+     * This is used to update the likes of post.
+     * 
      * @Route("/likes", name = "likes")
+     * When the user clicked on the like button this route is used.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
+     * 
+     *   @var string $uName
+     *     Stores the username of the user.
+     *   @var string $pId
+     *     Stores the post id on which the user likes.
+     *   @var string $isLiked
+     *     Stores if the user like or dislike the post.
+     * 
+     *   @return Response
+     *     Based on the user like or dislike the post.
      */
     public function likesAction(Request $rq): Response
     {
@@ -435,22 +459,20 @@ class FormController extends AbstractController
 
                 return new Response("Like DONE");   
             }
-            else {
-                $del = $this->em->getRepository(PostLike::class)->findOneBy(['likeBy' => $uName]);
-                $this->em->remove($del);
-                $this->em->flush();
+            $del = $this->em->getRepository(PostLike::class)->findOneBy(['likeBy' => $uName]);
+            $this->em->remove($del);
+            $this->em->flush();
 
-                $postLike = $this->em->getRepository(PostLike::class)->findBy(['postid' => $pId]);
-                $data = [
-                    "post" => $pId,
-                    "like" => count($postLike)
-                ];
+            $postLike = $this->em->getRepository(PostLike::class)->findBy(['postid' => $pId]);
+            $data = [
+                "post" => $pId,
+                "like" => count($postLike)
+            ];
 
-                $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
-                $pusher->trigger('demo_pusher', 'updateLike', $data);
+            $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
+            $pusher->trigger('demo_pusher', 'updateLike', $data);
 
-                return new Response("Like UNDONE");
-            }
+            return new Response("Like UNDONE");
         }
     }
 
@@ -459,6 +481,9 @@ class FormController extends AbstractController
      * 
      * @Route("/addPost", name = "addPost")
      * When the user clicked on the post button then this route is used.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
      * 
      *   @var string $post
      *     Store the post.
@@ -490,8 +515,7 @@ class FormController extends AbstractController
 
         $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
         $pusher->trigger('demo_pusher', 'addName', $data);
-        return new JsonResponse($data);
-        return new Response("SUCCESS");
+        return new Response("Post Added");
     }
 
     /**
@@ -499,6 +523,9 @@ class FormController extends AbstractController
      * 
      * @Route("/removeActiveUser", name = "removeActiveUser")
      * When the user close the tab this route is used.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
      * 
      *   @var string $userName
      *     Stores the username.
@@ -531,6 +558,9 @@ class FormController extends AbstractController
      * @Route("/addActiveUser", name = "addActiveUser")
      * When a new user logged in this route is used.
      * 
+     *   @param object $rq
+     *     Stores the object of Request class.
+     * 
      *   @var string $userName
      *      Stores the username.
      * 
@@ -552,7 +582,7 @@ class FormController extends AbstractController
         $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
         $pusher->trigger('demo_pusher', 'activeUser', $data);
         
-        return new Response("OK");
+        return new Response("Add active users");
     }
 
     /**
@@ -560,6 +590,9 @@ class FormController extends AbstractController
      * 
      * @Route("/getLikes", name = "getLikes")
      * When the user gets active this route is used to load the likes.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
      * 
      *   @var string $uName
      *     Stores the username.
@@ -572,7 +605,7 @@ class FormController extends AbstractController
         $post = $this->em->getRepository(PostLike::class)->findBy(['likeBy' => $uName]);
         $postLike = [];
         if ($post) {
-            for ($i=0; $i < count($post); $i++) { 
+            for ($i = 0; $i < count($post); $i++) { 
                 array_push($postLike, $post[$i]->getPostid());
             }
             return new JsonResponse(['likes' => $postLike]);
@@ -580,7 +613,6 @@ class FormController extends AbstractController
         return new Response(FALSE);
     }
 
-    
     /**
      * This is used to add comment to the post.
      * 
@@ -619,8 +651,10 @@ class FormController extends AbstractController
             "username" => $uName,
             "postid" => $postId
         ];
+
         $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
         $pusher->trigger('demo_pusher', 'add', $data);
+
         return new Response("comment added");
     }
 
@@ -687,7 +721,6 @@ class FormController extends AbstractController
         ];
         $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
         $pusher->trigger('demo_pusher', 'editpost', $data);
-        return new Response("edited");
+        return new Response("Post edited");
     }
-
 }

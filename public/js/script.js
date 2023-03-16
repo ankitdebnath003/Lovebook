@@ -125,15 +125,12 @@ function getOtp() {
     var otp = document.getElementById("otp");
     var email = jQuery('#emailid').val();
     otp.style.display = "block";
-    console.log("asd");
-    console.log(email);
     $.ajax({
         type: 'POST',
-        url: '/ajax',
+        url: '/sendOtp',
         data: {emailid:email},
         dataType: "text",
         success: function(response) {
-            // $('#otp').html(html);
             console.log(response);
         }
     });
@@ -221,11 +218,10 @@ $(function() {
             }
         });
     });
-    // }
 });
 
 function updateLike() {
-    var pusher = new Pusher('913b70eb80f62f270cf5', {
+    var pusher = new Pusher('5c90cb34f6af626fc27b', {
         cluster: 'ap2'
     });
     

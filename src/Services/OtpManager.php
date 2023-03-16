@@ -38,6 +38,8 @@ class OtpManager
      *
      *   @param string $pass
      *     Stores the password of the email id.
+     *   @param object $em
+     *     Stores the object of Entity Manager Interface Class.
      * 
      *   @return void
      */
@@ -83,6 +85,18 @@ class OtpManager
             return "Can't send mail to your email id";
         }
     }
+
+    /**
+     * The function is used to send the otp to user's email id.
+     *
+     *   @param string $email
+     *     Stores the user's email id.
+     *   @param string $link
+     *     Stores the link of the forgot password.
+     * 
+     *   @return string
+     *     Based on the mail sent to the user.
+     */
     public function sendMail(string $email, string $link) {
         try {
             $this->mail->isSMTP();
@@ -97,11 +111,11 @@ class OtpManager
             $this->mail->setFrom('rupamdas674@gmail.com');	
             $this->mail->isHTML(TRUE);				
             $this->mail->addAddress($email);	
-            $this->mail->Subject = 'Verify Your Email Id';
+            $this->mail->Subject = 'Your Forgot Password Link Is Here :';
             // Define the body of the mail.
-            $this->mail->Body = "Your otp is : $link<br>Use this to verify your email id";
+            $this->mail->Body = "$link<br>Use this link to Change your Password";
             if ($this->mail->send()) {
-                return "OTP has been sent to your email id";
+                return "Forgot password link has been sent to your email id";
             }
         }
         catch (Exception $e) {
@@ -114,8 +128,6 @@ class OtpManager
      *
      *   @param int $otp
      *     Stores the otp.
-     *   @param object $em
-     *     Stores the object of EntityManagerInterface class.
      * 
      *   @return bool
      *     Based on the availability of the otp in the database.
@@ -133,8 +145,6 @@ class OtpManager
      * 
      *   @param string $email
      *     Stores the email id of the user.
-     *   @param object $em
-     *     Stores the object of EntityManagerInterface class. 
      * 
      *   @return bool
      *     based on availability of the email id.
@@ -156,8 +166,6 @@ class OtpManager
      *     Stores the otp.
      *   @param bool $flag
      *     Stores the boolean value if the email exists or not.
-     *   @param object $em
-     *     Stores the object of EntityManagerInterface class.
      * 
      *   @return void
      */
@@ -168,11 +176,9 @@ class OtpManager
             $this->em->persist($user);
             $this->em->flush();
         }
-        else {
-            $user = new Userotp();
-            $user->setUserOtp($email, $otpno);
-            $this->em->persist($user);
-            $this->em->flush();
-        }
+        $user = new Userotp();
+        $user->setUserOtp($email, $otpno);
+        $this->em->persist($user);
+        $this->em->flush();
     }
 }
