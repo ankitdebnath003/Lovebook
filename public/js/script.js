@@ -74,7 +74,7 @@ function validationForm() {
     // Stores the first name of the employee.
     var fName = document.forms['myForm']["firstname"].value;
     // Check if first name has a valid length and doesn't contain any number.
-    if (fName.length < 4) {
+    if (fName.length < 2) {
         seterror("firstname", "*Length of first name is too short");
         returnval = false;
     }
@@ -86,7 +86,7 @@ function validationForm() {
     // Stores the last name of the employee.
     var lName = document.forms['myForm']["lastname"].value;
     // Check if last name has a valid length and doesn't contain any number.
-    if (lName.length < 4) {
+    if (lName.length < 2) {
         seterror("lastname", "*Length of last name is too short");
         returnval = false;
     }
@@ -120,17 +120,20 @@ $(document).ready(function(){
  * Used to send OTP when clicked on GetOtp button.
  */
 function getOtp() {
-    var resendotp = document.getElementById("resendotp");
-    resendotp.style.display = "block";
-    var otp = document.getElementById("otp");
-    var email = jQuery('#emailid').val();
-    otp.style.display = "block";
+    var email = $('#emailid').val();
     $.ajax({
         type: 'POST',
         url: '/sendOtp',
         data: {emailid:email},
         dataType: "text",
+        beforeSend: function () {
+            $('.loader').css("display","flex");
+        },
         success: function(response) {
+            $('.loader').css("display","none");
+            $("#otp").css("display","block");
+            $("#otp-success").css("display","block");
+            $("#getotp").text("Resend Otp");
             console.log(response);
         }
     });
@@ -141,6 +144,18 @@ function getOtp() {
  */
 $(function() {
     $("#getotp").click(function() {
+        $("#getotp").attr("disabled","disabled");
+        setTimeout(function() {
+            $("#getotp").removeAttr("disabled");
+        },10000);
+    });
+});
+
+/**
+ * Used to set timer to Resend Otp button.
+ */
+$(function() {
+    $("#resendotp").click(function() {
         $("#resendotp").attr("disabled","disabled");
         setTimeout(function() {
             $("#resendotp").removeAttr("disabled");
@@ -154,8 +169,8 @@ $(function() {
  *   @var username
  *     stores the username and checks for its availability.
  */
-$(document).ready(function(){
-    $('#username').blur(function(){
+$(document).ready(function() {
+    $('#username').blur(function() {
         var userName = $(this).val();
         if (userName.length == 0) {
             $('span').css("display","none");
@@ -168,67 +183,21 @@ $(document).ready(function(){
         $.ajax({
             type: 'POST',
             url: '/availability',
-            data: {username:userName},
+            data: 
+            {
+                username: userName
+            },
             dataType: "text",
             success: function(data) {
                 if (data) {
                     $('#availability1').css("display","block");
+                    $('#username').css("border","2px solid green");
                 }   
                 else {
                     $('#availability2').css("display","block");
+                    $('#username').css("border","2px solid red");
                 }             
             }
         });
     });
 });
-
-$(function() {
-    $(".likebtn").click(function() {
-        var uName = $('#uid1').text();
-        if (this.style.color != "blue") {
-            $(this).css("color", "blue");
-            var isLiked = "YES";
-            var likeNo = $(this).siblings().text();
-            var a = Number(likeNo);
-            $(this).siblings().html(++a);
-        }
-        else {
-            $(this).css("color", "black");
-            var likeNo = $(this).siblings().text();
-            var a = Number(likeNo);
-            $(this).siblings().html(--a);
-            var isLiked = "NO";
-        }
-        $.ajax({
-            type: 'POST',
-            url: '/likes',
-            data: 
-            {
-                username: uName,
-                postid: this.id,
-                like: isLiked
-            },
-            beforeSend: function () {
-                $('.loader').css("display","flex");
-            },
-            dataType: "text",
-            success: function(response) {
-                $('.loader').css("display","none");
-                console.log(response);
-            }
-        });
-    });
-});
-
-function updateLike() {
-    var pusher = new Pusher('5c90cb34f6af626fc27b', {
-        cluster: 'ap2'
-    });
-    
-    var channel = pusher.subscribe('demo_pusher');
-    channel.bind('updateLike', function(data) {
-        document.getElementById(data.post).previousElementSibling.innerHTML = data.like;
-    });
-}
-
-updateLike();

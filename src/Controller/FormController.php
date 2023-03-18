@@ -19,7 +19,12 @@ use App\Entity\PostLike;
 use Pusher\Pusher;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-
+/**
+ * This controller is used for every action in the form i.e., Signup, Login, Forgot
+ * password and All Post related actions.
+ * 
+ *   @package Doctrine
+ */
 class FormController extends AbstractController
 {
     /**
@@ -47,6 +52,46 @@ class FormController extends AbstractController
      *     stores the cluster of pusher.
      */
     private $cluster;
+    /**
+     *   @var object
+     *     stores the object of Pusher Class. 
+     */
+    private $pusher;
+    /**
+     *   @var object
+     *     stores the object of Username Entity Class.
+     */
+    private $user;
+    /**
+     *   @var object
+     *     stores the object of UserLogin Entity Class.
+     */
+    private $loginUser;
+    /**
+     *   @var object
+     *     stores the object of OTP Entity Class.
+     */
+    private $otp;
+    /**
+     *   @var object
+     *     stores the object of PostLike Entity Class.
+     */
+    private $postLike;
+    /**
+     *   @var object
+     *     stores the object of UserPost Entity Class.
+     */
+    private $userPost;
+    /**
+     *   @var object
+     *     stores the object of PostComment Entity Class.
+     */
+    private $postComment;
+    /**
+     *   @var object
+     *     stores the object of FormData Service Class.
+     */
+    private $form;
 
     /**
      * Constructor is used to set the values in class variables.
@@ -63,6 +108,14 @@ class FormController extends AbstractController
         $this->key = $_ENV['PUSHER_KEY'];
         $this->secret = $_ENV['PUSHER_SECRET'];
         $this->cluster = $_ENV['PUSHER_CLUSTER'];
+        $this->pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
+        $this->user = $em->getRepository(Username::class);
+        $this->loginUser = $em->getRepository(UserLogin::class);
+        $this->otp = $em->getRepository(Userotp::class);
+        $this->userPost = $em->getRepository(UserPost::class);
+        $this->postLike = $em->getRepository(PostLike::class);
+        $this->postComment = $em->getRepository(PostComment::class);
+        $this->form = new FormData($em);
     }
     
     /**
@@ -92,13 +145,9 @@ class FormController extends AbstractController
             $pass = $rq->get("password");
         }
         else {
-            $form = new FormData($this->em);
-            $loginUser = $form->getActiveUsers();
-            $posts = $form->getAllPosts();
             if ($si->get('username')) {
-                $form = new FormData($this->em);
-                $loginUser = $form->getActiveUsers();
-                $posts = $form->getAllPosts();
+                $loginUser = $this->form->getActiveUsers($this->loginUser);
+                $posts = $this->form->getAllPosts($this->userPost, $this->postLike, $this->postComment);
                 $si->set('postdata',$posts);
                 $si->set('loginuser',$loginUser);
                 return $this->render('form/index.html.twig',[
@@ -112,18 +161,16 @@ class FormController extends AbstractController
                 'msg' => ''
             ]);
         }
-        $form = new FormData($this->em);
-        $loginUser = $form->getActiveUsers();
-        $posts = $form->getAllPosts();
+        $loginUsers = $this->form->getActiveUsers($this->loginUser);
+        $posts = $this->form->getAllPosts($this->userPost, $this->postLike, $this->postComment);
         $si->set('username',$uName);
         $si->set('postdata',$posts);
-        $si->set('loginuser',$loginUser);
-
-        $user = $this->em->getRepository(Username::class)->findOneBy(['username' => $uName]);
+        $si->set('loginuser',$loginUsers);
+        $user = $this->user->findOneBy(['username' => $uName]);
         $msg = 1;
         $flag = 3;
 
-        if ($user != NULL) {
+        if ($user) {
             $checkPass = $user->getPassword();
             if (!password_verify($pass, $checkPass)) {
                 $msg = "Incorrect Password";
@@ -145,7 +192,7 @@ class FormController extends AbstractController
         return $this->render('form/index.html.twig',[
             "username" => $uName,
             "postdata" => $posts,
-            "logindata" => $loginUser
+            "logindata" => $loginUsers
         ]);
     }
 
@@ -262,8 +309,8 @@ class FormController extends AbstractController
     {
         if ($rq->isXmlHttpRequest()) {
             $uName = $rq->get('username');
-            $user = $this->em->getRepository(Username::class)->findOneBy(['username' => $uName]);
-            if ($user != NULL) {
+            $user = $this->user->findOneBy(['username' => $uName]);
+            if ($user) {
                 return new Response(FALSE);
             }
             return new Response(TRUE);
@@ -290,7 +337,8 @@ class FormController extends AbstractController
         $email = $rq->get('email');
         return $this->render('forget/password.html.twig',[
             "email" => $email,
-            "flag" => 3
+            "flag" => 1,
+            "msg" => ''
         ]);
     }
 
@@ -312,6 +360,10 @@ class FormController extends AbstractController
      * 
      *   @return Response
      *     Based on new valid password.
+     * 
+     * Here in the return flag variable is used to refer if the form has any 
+     * error or not. If flag = 1 then there is some error and if flag = 2 then 
+     * the new password has been set and the user can login with that password.
      */
     public function passchange(Request $rq): Response 
     {
@@ -320,7 +372,7 @@ class FormController extends AbstractController
         $cPass = $rq->get("confirmpassword");
         if ($cPass != $pass) {
             return $this->render('forget/password.html.twig',[
-                "msg" => "Incorrect Password",
+                "msg" => "Passwords are not matched",
                 "flag" => 1,
                 "email" => $email
             ]);
@@ -338,7 +390,7 @@ class FormController extends AbstractController
             ]);
         }
         $decry = urldecode(base64_decode($email));
-        $user = $this->em->getRepository(Username::class)->findOneBy(['email' => $decry]);
+        $user = $this->user->findOneBy(['email' => $decry]);
         $encry = password_hash($pass, PASSWORD_BCRYPT);
         $user->setPassword($encry);
         $this->em->persist($user);
@@ -356,6 +408,8 @@ class FormController extends AbstractController
      * @Route("/logout/{username}", name = "logout")
      * When clicked on logout button this route is used.
      * 
+     *   @param object $si
+     *     Stores the object of Session Interface class.
      *   @param object $rq
      *     Stores the object of Request class.
      * 
@@ -368,14 +422,12 @@ class FormController extends AbstractController
     public function logout(SessionInterface $si, Request $rq): Response
     {
         $userName = $rq->get("username");
-        $user = $this->em->getRepository(UserLogin::class)->findOneBy(['username' => $userName]);
+        $user = $this->loginUser->findOneBy(['username' => $userName]);
         $user->setisLogin("NO");
         $this->em->persist($user);
         $this->em->flush();
         $si->clear();
-        return $this->render('login/index.html.twig',[
-            "flag" => 3,
-        ]);
+        return $this->redirectToRoute('signin');
     }
 
     /**
@@ -397,8 +449,8 @@ class FormController extends AbstractController
     public function forgot(Request $rq): Response
     {
         $email = $rq->get("email");
-        $user = $this->em->getRepository(Userotp::class)->findOneBy(['email' => $email]);
-        if ($user == NULL) {
+        $user = $this->otp->findOneBy(['email' => $email]);
+        if (!$user) {
             return $this->render('forget/index.html.twig',[
                 "flag" => 1,
                 "msg" => "Email Id Not Found"
@@ -448,29 +500,27 @@ class FormController extends AbstractController
                 $this->em->persist($like);
                 $this->em->flush();
                 
-                $postLike = $this->em->getRepository(PostLike::class)->findBy(['postid' => $pId]);
+                $postLike = $this->postLike->findBy(['postid' => $pId]);
                 $data = [
                     "post" => $pId,
                     "like" => count($postLike)
                 ];
 
-                $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
-                $pusher->trigger('demo_pusher', 'updateLike', $data);
+                $this->pusher->trigger('demo_pusher', 'updateLike', $data);
 
                 return new Response("Like DONE");   
             }
-            $del = $this->em->getRepository(PostLike::class)->findOneBy(['likeBy' => $uName]);
+            $del = $this->postLike->findOneBy(['postid' => $pId]);
             $this->em->remove($del);
             $this->em->flush();
 
-            $postLike = $this->em->getRepository(PostLike::class)->findBy(['postid' => $pId]);
+            $postLike = $this->postLike->findBy(['postid' => $pId]);
             $data = [
                 "post" => $pId,
                 "like" => count($postLike)
             ];
 
-            $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
-            $pusher->trigger('demo_pusher', 'updateLike', $data);
+            $this->pusher->trigger('demo_pusher', 'updateLike', $data);
 
             return new Response("Like UNDONE");
         }
@@ -504,7 +554,7 @@ class FormController extends AbstractController
         $userPost->setPost($post);
         $this->em->persist($userPost);
         $this->em->flush();
-        $getPost = $this->em->getRepository(UserPost::class)->findBy(['username' => $userName]);
+        $getPost = $this->userPost->findBy(['username' => $userName]);
         $c = count($getPost)-1;
         $postId = $getPost[$c]->getId();
         $data = [
@@ -513,8 +563,7 @@ class FormController extends AbstractController
             "postid" => $postId
         ];
 
-        $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
-        $pusher->trigger('demo_pusher', 'addName', $data);
+        $this->pusher->trigger('demo_pusher', 'addName', $data);
         return new Response("Post Added");
     }
 
@@ -534,20 +583,18 @@ class FormController extends AbstractController
      */
     public function removeActiveUserAction(Request $rq): Response
     {
-
         $userName = $rq->get("userid");
         $data = [
             "userid" => $userName,
             "action" => "remove"
         ];
 
-        $login = $this->em->getRepository(UserLogin::class)->findOneBy(['username' => $userName]);
+        $login = $this->loginUser->findOneBy(['username' => $userName]);
         $login->setIsLogin("NO");
         $this->em->persist($login);
         $this->em->flush();
 
-        $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
-        $pusher->trigger('demo_pusher', 'activeUser', $data);
+        $this->pusher->trigger('demo_pusher', 'activeUser', $data);
         
         return new Response("OK");
     }
@@ -569,7 +616,7 @@ class FormController extends AbstractController
     public function addActiveUserAction(Request $rq): Response
     {
         $userName = $rq->get("userid");
-        $login = $this->em->getRepository(UserLogin::class)->findOneBy(['username' => $userName]);
+        $login = $this->loginUser->findOneBy(['username' => $userName]);
         $login->setIsLogin("YES");
         $this->em->persist($login);
         $this->em->flush();
@@ -579,8 +626,7 @@ class FormController extends AbstractController
             "action" => "add"
         ];
 
-        $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
-        $pusher->trigger('demo_pusher', 'activeUser', $data);
+        $this->pusher->trigger('demo_pusher', 'activeUser', $data);
         
         return new Response("Add active users");
     }
@@ -602,7 +648,7 @@ class FormController extends AbstractController
     public function getLikesAction(Request $rq): Response
     {
         $uName = $rq->get("username");
-        $post = $this->em->getRepository(PostLike::class)->findBy(['likeBy' => $uName]);
+        $post = $this->postLike->findBy(['likeBy' => $uName]);
         $postLike = [];
         if ($post) {
             for ($i = 0; $i < count($post); $i++) { 
@@ -642,7 +688,7 @@ class FormController extends AbstractController
         $this->em->persist($post);
         $this->em->flush();
         
-        $comm = $this->em->getRepository(PostComment::class)->findBy(['postid' => $postId]);
+        $comm = $this->postComment->findBy(['postid' => $postId]);
         $commNo = count($comm);
         
         $data = [
@@ -652,8 +698,7 @@ class FormController extends AbstractController
             "postid" => $postId
         ];
 
-        $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
-        $pusher->trigger('demo_pusher', 'add', $data);
+        $this->pusher->trigger('demo_pusher', 'add', $data);
 
         return new Response("comment added");
     }
@@ -674,18 +719,16 @@ class FormController extends AbstractController
      */
     public function deletePostAction(Request $rq): Response
     {
-
         $postId = $rq->get("id");
-        $post = $this->em->getRepository(UserPost::class)->findOneBy(['id' => $postId]);
-        $comment = $this->em->getRepository(PostComment::class)->findBy(['postid' => $postId]);
+        $post = $this->userPost->findOneBy(['id' => $postId]);
+        $comment = $this->postComment->findBy(['postid' => $postId]);
         for ($i = 0; $i < count($comment); $i++) { 
             $this->em->remove($comment[$i]);
         }
         $this->em->remove($post);
         $this->em->flush();
-        $postId = 'post'.$postId;
-        $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
-        $pusher->trigger('demo_pusher', 'deletepost', $postId);
+        $postId = 'post' . $postId;
+        $this->pusher->trigger('demo_pusher', 'deletepost', $postId);
         return new Response($postId);
     }
 
@@ -704,23 +747,53 @@ class FormController extends AbstractController
      *     Stores the edited text.
      * 
      *   @return Response
+     *     
      */
     public function editPostAction(Request $rq): Response
     {
         $postId = $rq->get("id");
         $text = $rq->get("post");
 
-        $post = $this->em->getRepository(UserPost::class)->findOneBy(['id' => $postId]);
+        $post = $this->userPost->findOneBy(['id' => $postId]);
         $post->setPost($text);
         $this->em->persist($post);
         $this->em->flush();
-        $postId = 'post'.$postId;
+        $postId = 'post' . $postId;
         $data = [
             'id' => $postId,
             'text' => $text
         ];
-        $pusher = new Pusher($this->key, $this->secret, $this->id, ['cluster' => $this->cluster]);
-        $pusher->trigger('demo_pusher', 'editpost', $data);
+        $this->pusher->trigger('demo_pusher', 'editpost', $data);
         return new Response("Post edited");
+    }
+
+    /**
+     * This is used to show the edit/delete post option to those users who add the post.
+     * 
+     * @Route("/addRights", name = "addRights")
+     * When the user edit the post this route is called.
+     * 
+     *   @param object $rq
+     *     Stores the object of Request class.
+     * 
+     *   @var string $postId
+     *     Stores the id of the post.
+     *   @var string $text
+     *     Stores the edited text.
+     * 
+     *   @return Response
+     *     
+     */
+    public function addRightsAction(Request $rq): Response
+    {
+        $id = $rq->get("userid");
+        $post = $this->userPost->findBy(['username' => $id]);
+        $posts = [];
+        foreach ($post as $i) {
+            array_push($posts, $i->getId());
+        }
+        // $data = ['id' => $posts];
+        $this->pusher->trigger('demo_pusher', 'giveRights', $posts);
+        return new Response("Rights Given");
     }
 }

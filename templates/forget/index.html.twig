@@ -6,13 +6,8 @@
     <link rel="stylesheet" href="{{ asset('css/login.style.css') }}">
 {% endblock %}
 
-{% block javascripts %}
-    <script src="{{ asset('js/script.js') }}"></script>
-{% endblock %}
-
 {% block body %}
 
-    <!-- creating a form with username and password for login -->
     <div class="container">
         {% if flag == 2 %}
             <form action="/forgot" method="post">

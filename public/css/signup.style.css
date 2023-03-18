@@ -146,10 +146,7 @@ label{
 }
 
 .otp {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .otp .form-control {
@@ -172,4 +169,19 @@ label{
 
 .formerror {
     display: none;
+}
+
+button {
+    cursor: pointer;
+}
+
+#otp {
+    display: none;
+    width: 50%;
+}
+
+#otp-success {
+    font-size: 15px;
+    display: none;
+    margin: 5px;
 }

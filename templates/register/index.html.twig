@@ -39,10 +39,10 @@
                 <label for="email">Email Id :</label>
                 <input id="emailid" type="email" required class="form-control" name="email">
                 <div class="otp">
+                    <input id="otp" type="number" required class="form-control" name="otp" placeholder="Enter the OTP">
+                    <p id="otp-success" class="text-success">Otp has been sent to your email address.</p>
                     <button class="btn btn-primary" disabled id="getotp" onclick="getOtp()">Get OTP</button>
-                    <input id="otp" type="number" required class="form-control" name="otp">
                 </div>
-                <button class="btn btn-primary" id="resendotp" onclick="getOtp()">Resend OTP</button>
             </div>
             <div class="form-group" class="same" id="pass">
                 <label for="password">Password :</label>
@@ -68,7 +68,7 @@
             </div>
             <div class="sign">
                 <p>Already Have An Account?</p>
-                <a href="/login">SIGN IN</a>
+                <a href="/signin">SIGN IN</a>
             </div>
         </form>
     </div>

@@ -27,6 +27,26 @@ class MainController extends AbstractController
      *     stores the object of the Entity Manager Interface Class.
      */
     public $em;
+    /**
+     *   @var object
+     *     stores the object of the Entity Manager Interface Class.
+     */
+    public $loginUser;
+    /**
+     *   @var object
+     *     stores the object of the Entity Manager Interface Class.
+     */
+    public $userPost;
+    /**
+     *   @var object
+     *     stores the object of the Entity Manager Interface Class.
+     */
+    public $postLike;
+    /**
+     *   @var object
+     *     stores the object of the Entity Manager Interface Class.
+     */
+    public $postComment;
 
     /**
      * Constructor is used to set the values in class variables.
@@ -38,6 +58,10 @@ class MainController extends AbstractController
      */
     public function __construct(EntityManagerInterface $em)
     {
+        $this->loginUser = $em->getRepository(UserLogin::class);
+        $this->userPost = $em->getRepository(UserPost::class);
+        $this->postLike = $em->getRepository(PostLike::class);
+        $this->postComment = $em->getRepository(PostComment::class);
         $this->em = $em;
     }
     
@@ -55,21 +79,29 @@ class MainController extends AbstractController
     }
 
     /**
-     * This method is used to send the user to the main page of the controller.
+     * This method is used to send the user to the login page from any other page
+     * than login itself.
      * 
-     * @Route("/main", name="main")
-     * When the user sets the route to main then this route is used.
+     *   @Route("/signin", name="signin")
+     *   When the user sets the route to signin then this route is used.
      * 
      *   @return Response
      */
-    public function main(SessionInterface $si, Request $rq, EntityManagerInterface $em): Response
+    public function signin(): Response
     {
-        $n = NULL;
-        echo $n;
-        if($n) {
-            echo "null";
-        }
-        echo "not null";
+        return $this->redirectToRoute('login');
+    }
+
+    /**
+     * This method is used to send the user to the main page of the controller.
+     * 
+     *   @Route("/main", name="main")
+     *   When the user sets the route to main then this route is used.
+     * 
+     *   @return Response
+     */
+    public function main(): Response
+    {
         return $this->render('main/index.html.twig');
     }
 
@@ -78,8 +110,8 @@ class MainController extends AbstractController
      * user already logged in then send the user to the main page otherwise send
      * the user to the login page.
      * 
-     * @Route("/login", name = "login")
-     * When the user try to login to the main page this route is used.
+     *   @Route("/login", name = "login")
+     *   When the user try to login to the main page this route is used.
      * 
      *   @param object $si
      *     Stores the object Session Interface Class.
@@ -90,8 +122,8 @@ class MainController extends AbstractController
     {
         if ($si->get('username')) {
             $form = new FormData($this->em);
-            $loginUser = $form->getActiveUsers();
-            $posts = $form->getAllPosts();
+            $loginUser = $form->getActiveUsers($this->loginUser);
+            $posts = $form->getAllPosts($this->userPost, $this->postLike, $this->postComment);
             $si->set('postdata',$posts);
             $si->set('loginuser',$loginUser);
             return $this->render('form/index.html.twig',[

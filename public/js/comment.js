@@ -51,7 +51,9 @@ addComment();
 
 $(document).ready(function() {
     $(".cmmntt").click(function(){
-        $(this).siblings('.comment-section').slideToggle();
+        $(this).siblings('.comment-section').slideToggle(function() {
+            $(this).is(':visible') ? $(this).siblings('#comment1').val("Hide Comments"): $(this).siblings('#comment1').val("Show Comments");
+        });
     });
 });
 

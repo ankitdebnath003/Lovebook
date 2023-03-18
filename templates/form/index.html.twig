@@ -8,8 +8,8 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('js/script.js') }}"></script>
     <script src="{{ asset('js/post.js') }}"></script>
+    <script src="{{ asset('js/like.js') }}"></script>
     <script src="{{ asset('js/comment.js') }}"></script>
     <script src="{{ asset('js/activeUser.js') }}"></script>
     <script src="{{ asset('js/popup.js') }}"></script>
@@ -40,7 +40,7 @@
                 <input id="newPost" type="text" class="form-control" name="comment" placeholder="Write Your Comment......">
             </div>
             <div class="text-center">
-                <input type="submit" id="newposts" class="mt-3 btn btn-primary" value="Submit"></input>
+                <input type="submit" onclick="newpost(this.id)" id="abc" class="newposts mt-3 btn btn-primary" value="Submit"></input>
             </div>
         </div>
     </div>
@@ -83,7 +83,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <p>{{ item.post }}</p>
+                        <p class="userpost">{{ item.post }}</p>
                         <div class="bottom-post">
                             <div class="like">
                                 <p>{{ item.likes }}</p>
@@ -91,7 +91,7 @@
                             </div>
                             <p class="cmmnt" id="showComment">{{ item.comments }} Comments</p>
                         </div>
-                        <button class="cmmntt" id="comment1">Comments</button>
+                        <input type="submit" id="comment1" class="cmmntt btn" value="Show Comments">
                         <div class="comment-section">
                             <div class="comment comment{{item.id}}">
                             {% for comments in item.comment %}
@@ -106,7 +106,7 @@
                             </div>
                             <div class="formcomment">
                                 <input class='commtexttt' type="text" required id="commtext" name="comment" placeholder="Enter your comment here.....">
-                                <input type="submit" commentid="{{ item.id }}" class="cmmnt-btn" name="cmmntbtn" value="Comment">
+                                <input type="submit" commentid="{{ item.id }}" class="cmmnt-btn btn" name="cmmntbtn" value="Comment">
                             </div>
                         </div>
                     </div>

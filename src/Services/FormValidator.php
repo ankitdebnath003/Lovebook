@@ -95,7 +95,7 @@ class FormValidator
     public function validateForm() {
 
         // Check the length of the name.
-        if (strlen($this->fName) < 4 or strlen($this->lName) < 4) {
+        if (strlen($this->fName) < 2 or strlen($this->lName) < 2) {
             return "Name field is too short";
         }
 

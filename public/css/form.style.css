@@ -75,13 +75,13 @@ header {
 }
 
 .post-btn {
+    cursor: pointer;
     position: absolute;
     right: 10px;
     bottom: 15px;
     display: inline-block;
     padding: 2px 20px;
     background-color: rgb(216, 146, 146);
-    /* background-color: rgb(179, 120, 120); */
     color: #222;
     border: none;
     border-radius: 10px;
@@ -152,6 +152,7 @@ header {
 
 .likebtn {
     color: #222;
+    cursor: pointer;
 }
 
 #commtext {
@@ -215,6 +216,10 @@ header {
     margin-left: 5px;
 }
 
+.cmmntt {
+    cursor: pointer;
+}
+
 .cmmnt-btn {
     margin-top: 10px;
 }
@@ -243,6 +248,7 @@ header {
 }
 
 .menu {
+    display: none;
     cursor: pointer;
 }
 
@@ -299,4 +305,8 @@ header p {
 .dropdown-menu a:hover {
     color: #222;
     background-color: rgb(182, 87, 87);
+}
+
+.userpost {
+    word-wrap: break-word; 
 }

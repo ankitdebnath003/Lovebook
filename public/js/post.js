@@ -69,7 +69,7 @@ function addPost() {
                 </ul>
             </div>
         </div>
-        <p>${ data.post }</p>
+        <p class="userpost">${ data.post }</p>
         <div class="bottom-post">
             <div class="like">
                 <p>0</p>
@@ -133,7 +133,6 @@ $(window).on("load", function(){
 });
 
 function showMenu(id) {
-    // $("#"+id).siblings(".menu-list").slideToggle();
     if ($("#"+id).siblings(".menu-list").css("display") == "block") {
         $("#"+id).siblings(".menu-list").css("display","none");
     }

@@ -34,8 +34,8 @@ class FormData
      *   @return array
      *     Send all the active users.
      */
-    public function getActiveUsers() {
-        $loginData = $this->em->getRepository(UserLogin::class)->findAll();
+    public function getActiveUsers($loginUser) {
+        $loginData = $loginUser->findAll();
         $loginUser = [];
         for ($i = count($loginData)-1; $i >= 0; $i--) {
             if ($loginData[$i]->getIsLogin() == "YES") {
@@ -52,22 +52,22 @@ class FormData
      *   @return array
      *     Send all the Post details.
      */
-    public function getAllPosts() {
-        $postData = $this->em->getRepository(UserPost::class)->findAll();
+    public function getAllPosts(object $userPost, object $postLike, object $postComment) {
+        $postData = $userPost->findAll();
         $posts = [];
         for ($i = count($postData)-1; $i >=0 ; $i--) {
             $id = $postData[$i]->getId();
 
-            $postComment = $this->em->getRepository(PostComment::class)->findBy(['postid' => $id]);
+            $allComment = $postComment->findBy(['postid' => $id]);
             $comment = [];
-            for ($j = count($postComment)-1; $j >=0 ; $j--) {
-                array_push($comment, $postComment[$j]->getComments());
+            for ($j = count($allComment)-1; $j >=0 ; $j--) {
+                array_push($comment, $allComment[$j]->getComments());
             }
-            $postLike = $this->em->getRepository(PostLike::class)->findBy(['postid' => $id]);
+            $allLike = $postLike->findBy(['postid' => $id]);
             $name = $postData[$i]->getUsername();
             $post = $postData[$i]->getPost();
-            $like = count($postLike);
-            $comments = count($postComment);
+            $like = count($allLike);
+            $comments = count($allComment);
             $arr = [
                 'id' => $id,
                 'user' => $name,

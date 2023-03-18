@@ -23,3 +23,5 @@ abc.txt
 /bin/
 /test/
 /translations/
+.env
+.env.test

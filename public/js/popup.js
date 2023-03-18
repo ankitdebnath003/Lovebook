@@ -2,8 +2,7 @@ function cross() {
     $(".popup").css("display","none");
 }
 
-$("#newposts").click(function() {
-    console.log("ads");
+function newpost(id) {
     var post = $("#newPost").val();
     $.ajax({
         type: 'POST',
@@ -24,19 +23,16 @@ $("#newposts").click(function() {
             $(".loader").css("display","none");
             $('#cross-'+id).css("display","none");
             $('#menubar-'+id).css("display","block");
-            console.log("2");
-            console.log("4");
             $('#cross-'+id).siblings('.menu-list').css("display","none");
         }
     });
-});
+}
 
 function editPost(id) {
     console.log(id);
     var comm = id.indexOf("-");
-    // document.getElementById('newposts').id = 'newposts'+id;
-    // console.log(document.getElementById('newposts'));
     var id = id.substring(++comm);
+    $(".newposts").attr('id', id);
     $(".popup").css("display","flex");
 }
 
@@ -49,7 +45,6 @@ function editPostLive() {
     channel.bind('editpost', function(data) {
         console.log(data);
         $('#'+data.id).children('p').text(data.text);
-        // console.log($('#'+data.id).children('p').text());
     });
 }
 editPostLive();
