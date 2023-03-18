@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Register {% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/form.style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/popup.style.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/post.js') }}"></script>
+    <script src="{{ asset('js/like.js') }}"></script>
+    <script src="{{ asset('js/comment.js') }}"></script>
+    <script src="{{ asset('js/activeUser.js') }}"></script>
+    <script src="{{ asset('js/popup.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+
+    <header class="bg-white">
+        <nav class="container navbar navbar-expand-lg navbar-light bg-white shadow">
+            <img class="logo" src="{{ asset('images/logo.png') }}" alt="logo">
+            <div class="dropdown show ml-auto">
+                <a class="btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa-regular fa-user"></i>
+                    <p id="uid1">{{ username }}</p>
+                </a>
+                <div class="dropdown-menu pd-5" aria-labelledby="dropdownMenuLink">
+                    <a class="dropdown-item" href="/logout/{{ username }}">Log Out</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="popup">
+        <div class="content">
+            <input type="submit" onclick="cross()" class="closebtn" value="&times;">
+            <div class="form-group my-4">
+                <input id="newPost" type="text" class="form-control" name="comment" placeholder="Write Your Comment......">
+            </div>
+            <div class="text-center">
+                <input type="submit" onclick="newpost(this.id)" id="abc" class="newposts mt-3 btn btn-primary" value="Submit"></input>
+            </div>
+        </div>
+    </div>
+
+    <div class="container main-body">
+        <div class="left">
+            <h3 class="text-center">Active User</h3>
+            <div class="inner-left">
+                {% for item in logindata %}
+                    <div class="user">
+                        <i class="fa-regular fa-user"></i>
+                        <p id="user{{ item }}">{{ item }}</p>
+                        <i class="active fa-solid fa-circle"></i>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="right">
+            <div class="inner-right">
+                <div class="form">
+                    <textarea name="post" id="post" cols="80" rows="5" placeholder="Write your post here......"></textarea>
+                    <input type="submit" disabled id="post-btn" class="post-btn" name="postbtn" value="POST" onclick="callAddPost()">
+                </div>
+                <h4>All Posts</h4>
+                <div class="post-area">
+                {% for item in postdata %}
+
+                    <div id="post{{ item.id }}" class="posts">
+                        <div class="inner-post">
+                            <div class="userdetails">
+                                <i class="fa-regular fa-user"></i>
+                                <p class="uname">{{ item.user }}</p>
+                            </div>
+                            <div class="menu" id="menu-{{ item.id }}">
+                                <i id="menubar-{{item.id}}" onclick="showMenu(this.id)" class="menubar fa-solid fa-bars"></i>
+                                <i id="cross-{{item.id}}" onclick="showMenu(this.id)" class="cross fa-sharp fa-solid fa-circle-xmark"></i>
+                                <ul class="menu-list">
+                                    <li id="edit-{{item.id}}" onclick="editPost(this.id)">Edit Post</li>
+                                    <li id="delete-{{item.id}}" onclick="deletePost(this.id)">Delete Post</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="userpost">{{ item.post }}</p>
+                        <div class="bottom-post">
+                            <div class="like">
+                                <p>{{ item.likes }}</p>
+                                <i id={{ item.id }} class="likebtn fa-solid fa-thumbs-up"></i>
+                            </div>
+                            <p class="cmmnt" id="showComment">{{ item.comments }} Comments</p>
+                        </div>
+                        <input type="submit" id="comment1" class="cmmntt btn" value="Show Comments">
+                        <div class="comment-section">
+                            <div class="comment comment{{item.id}}">
+                            {% for comments in item.comment %}
+                                <div class="inner-comment">
+                                    <div class="like">
+                                        <i class="fa-regular fa-user"></i>
+                                        <p class="uname">{{ item.user }}</p>
+                                    </div>
+                                    <p>{{ comments }}</p>
+                                </div>
+                            {% endfor %}
+                            </div>
+                            <div class="formcomment">
+                                <input class='commtexttt' type="text" required id="commtext" name="comment" placeholder="Enter your comment here.....">
+                                <input type="submit" commentid="{{ item.id }}" class="cmmnt-btn btn" name="cmmntbtn" value="Comment">
+                            </div>
+                        </div>
+                    </div>
+                
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}

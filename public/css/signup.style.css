@@ -1,0 +1,187 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Libre Baskerville', serif;
+    background: linear-gradient(rgba(0, 0, 0, 0.60), rgba(0, 0, 0, 0.60)), url(../images/background.jpg) no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+h1 {
+    text-align: center;
+    font-weight: bolder;
+    background-clip: border-box;
+    background: -webkit-linear-gradient(#EE8, #361);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+form {
+    width: 50%;
+    margin: 50px auto;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    background-color: #222;
+    padding: 30px;
+    color: #fff;
+    background: linear-gradient(rgba(0, 0, 0, 0.40), rgba(0, 0, 0, 0.40));
+}
+
+.pass {
+    display: flex;
+    align-items: center;
+}
+
+.pass div {
+    position: relative;
+}
+
+.pass div:last-child i {
+    color: green;
+    right: -28px;
+}
+
+.pass i {
+    position: absolute;
+    right: -20px;
+    top: -12px;
+    font-size: 25px;
+}
+
+#wrong {
+    display: none;
+}
+
+#correct {
+    display: none;
+}
+
+.btn {
+    padding: 10px 40px;
+}
+
+i {
+    color: red;
+}
+
+.sign {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sign p {
+    margin: 0;
+}
+
+.sign a {
+    margin: 10px 10px;
+}
+
+.logout {
+    padding: 7px 40px;
+    color: white;
+    background: #935cf5;
+    border-radius: 20px;
+    display: inline-block;
+    text-decoration: none;
+    font-size: 20px;
+}
+
+.logout:hover {
+    color: #000;
+    text-decoration: none;
+}
+
+.input-group input {
+    font-size: 20px;
+}
+
+.page-link {
+    padding: 10px 30px;
+}
+
+label{
+    display: block;
+}
+
+.formerror{
+    padding-left: 20px;
+    color: red;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    font-size: 20px;
+}
+
+.backbtn {
+    margin-top: 20px;
+    text-decoration: none;
+    display: inline-block;
+    padding: 10px 30px;
+    font-size: 25px;
+    background-color: #935cf5;
+    color: #fff;
+    border-radius: 20px;
+}
+
+.backbtn:hover {
+    color: #222;
+}
+
+.validate {
+    text-align: center;
+    font-size: 40px;
+    color: #fff;
+}
+
+.formerror {
+    color: red;
+}
+
+.otp {
+    margin-top: 15px;
+}
+
+.otp .form-control {
+    width: 65%;
+    display: none;
+}
+
+.otp a {
+    cursor: pointer;
+}
+
+#resendotp {
+    display: none;
+    margin-top: 10px;
+}
+
+#availability1 , #availability2 {
+    display: none;
+}
+
+.formerror {
+    display: none;
+}
+
+button {
+    cursor: pointer;
+}
+
+#otp {
+    display: none;
+    width: 50%;
+}
+
+#otp-success {
+    font-size: 15px;
+    display: none;
+    margin: 5px;
+}
